@@ -21,7 +21,7 @@ client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-var twitchEnabled = false;
+var twitchEnabled = true;
 var vStreamEnabled = false;
 
 var cleanupStreamEmbedsTimer;
@@ -171,9 +171,9 @@ async function checkStreams() {
                         const twitchStreamOnline = await getStreamInfo(guildSettings.twitchStreams[i]);
                         if(twitchStreamOnline !== undefined) {
                             try { 
-                                if(botSettings.twitchToken == undefined || botSettings.twitchToken === null || botSettings.twitchToken.length < 5) {
-                                    throw "Twitch token in bot settings invalid";
-                                }
+                                // if(botSettings.twitchToken == undefined || botSettings.twitchToken === null || botSettings.twitchToken.length < 5) {
+                                //     throw "Twitch token in bot settings invalid";
+                                // }
                                 const actChannelManager = g.channels;
                                 const msgChannel = actChannelManager.resolve(guildSettings.notificationChannelId);
                                 let activityUsername = guildSettings.twitchStreams[i]; // TODO - remove this now that it's not using activity 
@@ -355,8 +355,9 @@ client.once('ready', async () => {
         let startMsg = ':robot: Bot started';
         if(botSettings.botIcon) { startMsg = `${botSettings.botIcon} Bot started`; }
         await logChannel.send(startMsg);
-        let twitchCheck = await twitchTokenHeartbeat();
-        if(twitchCheck) { await logChannel.send(`:ballot_box_with_check: Twitch connected`); }
+        // let twitchCheck = await twitchTokenHeartbeat();
+        // if(twitchCheck) { await logChannel.send(`:ballot_box_with_check: Twitch connected`); }
+        await logChannel.send(`:grey_question: Twitch uses refresh token, skipping check.`);
         // vStreamEnabled = true; // comment this out if the token refresh below is enabled
         // let vStreamTokenRefresh = await checkVStreamToken(); // comment this out when testing so it's not hammering vstream's API on startups 
         // if(vStreamTokenRefresh) { await logChannel.send(`:ballot_box_with_check: vStream connected`); } // comment this out when testing so it's not hammering vstream's API on startups 
@@ -377,7 +378,7 @@ client.once('ready', async () => {
     
     // timers
     // checkTwitchConnectionInterval = setInterval(twitchTokenHeartbeat,15000); // 15 seconds
-    checkTwitchConnectionInterval = setInterval(twitchTokenHeartbeat,60*60000); // 1 hour 
+    // checkTwitchConnectionInterval = setInterval(twitchTokenHeartbeat,60*60000); // 1 hour 
     
     // refreshVStreamTokenTimer = setInterval(checkVStreamToken,1*60000); // 60 seconds
     // refreshVStreamTokenTimer = setInterval(checkVStreamToken,45*60000); // 45 minutes    
