@@ -1,3 +1,7 @@
+const dbLocation = require('../botSettings.json').dbLocaion;
+const Nedb = require('nedb-promises');
+const guildsDb = Nedb.create({ filename: `${dbLocation}\\guilds.db`, autoload: true });
+
 const fs = require('fs');
 const { getAllGuildSettings } = require('./getGuildSettings');
 const guildsSettingsDir = require('../botSettings.json').guildSettingsDir
@@ -44,12 +48,29 @@ async function setGuildSetting(guildSettingsFilename, setting, newValue) {
     }
     try {
         fs.writeFileSync(guildSettingsFilePath,JSON.stringify(newSettings));
-        return true;
+        // return true;
     }
     catch(error) {
         console.log(error);
+        // return false;
+    }
+
+    console.log(`Done updating setting in file. Updating setting in db...`);
+
+    try {
+        const numAffected = await guildsDb.update(
+            { id: guildSettingsFilename },
+            { $set: { [setting]: newValue }},
+            { upsert: true}
+        );
+        console.log(`Updated ${numAffected} guild(s)`);
+        return true;
+    } 
+    catch (error) 
+    {
+        console.error('Error updating guild:', error);
         return false;
     }
 }
-
+ 
 module.exports.setGuildSetting = setGuildSetting;
