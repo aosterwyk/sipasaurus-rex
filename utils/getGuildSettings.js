@@ -1,52 +1,48 @@
-const fs = require('fs');
-const util = require('util');
-const guildsSettingsDir = require('../botSettings.json').guildSettingsDir
+const path = require('node:path');
+const Nedb = require('nedb-promises');
+const botSettings = require('../botSettings.json');
 
-async function getAllGuildSettings(guildSettingsFilename) {
-    let guildSettings = {};
-    let guildSettingsFilePath = `${guildsSettingsDir}${guildSettingsFilename}.sipa`;    
-    const readFile = util.promisify(fs.readFile);
-    if(fs.existsSync(guildSettingsFilePath)) {     
-        try {
-            const settingsFile = await readFile(guildSettingsFilePath);
-            guildSettings = JSON.parse(settingsFile);
-        }
-        catch(error) {
-            console.log(error);
-        }
+const dbPath = path.join(botSettings.dbLocation, 'guilds.db');
+const db = Nedb.create({ filename: dbPath });
+console.log(dbPath);
+
+async function getAllGuildSettings(guildId) {
+//   let guildSettings = {};
+  try {
+    // Query the database for all settings for this guildId
+    const settings = await db.findOne({ id: guildId });
+    // console.log(settings);
+
+    if(settings) {
+        return settings;
+    } else { 
+        return {};
     }
-    else {
-        let errorMsg = `Could not load file: ${guildSettingsFilePath}`;
-        console.error(errorMsg);
-    }
-    return guildSettings;
+  } catch (error) {
+    console.error(`Error fetching all settings for guild ${guildId}:`, error);
+    return {};
+  }
 }
 
-async function getGuildSetting(guildSettingsFilename, setting) {
-    let guildSettings = {};
-    let guildSettingsFilePath = `${guildsSettingsDir}${guildSettingsFilename}.sipa`;        
-    const readFile = util.promisify(fs.readFile);
-    if(fs.existsSync(guildSettingsFilePath)) {     
-        try {
-            const settingsFile = await readFile(guildSettingsFilePath);
-            guildSettings = JSON.parse(settingsFile);
-            if(guildSettings.hasOwnProperty(setting)) {
-                return guildSettings[setting];
-            }
-            else {
-                return undefined;
-            }
-        }
-        catch(error) {
-            console.log(error);
-            return undefined;
-        }
+async function getGuildSetting(guildId, setting) {
+  try {
+    // Query the database for a specific setting
+    const result = await db.findOne({ id: guildId, key: setting });
+    console.log(`result`)
+    console.log(result)
+    
+    // Check if the setting was found
+    if (result) {
+      console.log(`result.value`);
+      console.log(result.value);
+      return result.value;
+    } else {
+      return undefined;
     }
-    else {
-        let errorMsg = `Could not load file: ${guildSettingsFilePath}`;
-        console.error(errorMsg);
-        return undefined;
-    }
+  } catch (error) {
+    console.error(`Error fetching setting ${setting} for guild ${guildId}:`, error);
+    return undefined;
+  }
 }
 
 module.exports.getAllGuildSettings = getAllGuildSettings;
