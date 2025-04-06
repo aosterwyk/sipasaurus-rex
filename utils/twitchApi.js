@@ -105,7 +105,7 @@ async function twitchAPI(url) {
         if (error.response && error.response.status === 401) { // Token expired
             console.log('Token expired, attempting to refresh...');
             const newToken = await refreshAccessToken();
-            return getUserInfo(newToken); // Retry with new token
+            return getUserInfo(newToken); // Retry with new token // TODO - this probably breaks for a lot of functions (steam info, etc.)
         }
         else {        
             console.log(`Twitch API error: ${error}`);

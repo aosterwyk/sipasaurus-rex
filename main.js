@@ -89,6 +89,15 @@ async function cleanupStreamEmbeds() {
     streamMessages = await getStreamMessages();
 }
 
+async function checkMessageExists(channel, messageId) {
+    try {
+        const message = await channel.messages.fetch(messageId);
+        return true; 
+    } catch (error) {
+        return false; 
+    }
+}
+
 async function updateStreamEmbeds(streamUsername,guildSettings,guildId,msgChannel,streamEmbedMsg,streamPlatform) { // TODO - rename this function 
     let foundMessage = false;
     let searchMessageId = `${guildId}-${streamUsername}-${streamPlatform}`; // TODO - use this for activity ID below
@@ -96,23 +105,31 @@ async function updateStreamEmbeds(streamUsername,guildSettings,guildId,msgChanne
         if(key == searchMessageId) {
             let embedMsgContent = ``;
             let roleMention = ``;
-            if(guildSettings.roleToPing !== undefined && guildSettings.roleToPing !== 'none') {
-                // roleMention = await g.roles.fetch(guildSettings.roleToPing);
-                // roleMention = await guildId.roles.fetch(guildSettings.roleToPing);                
-                let findGuild = await client.guilds.fetch(guildId);
-                roleMention = await findGuild.roles.fetch(guildSettings.roleToPing);
-                embedMsgContent = `${roleMention}`;
-                msgChannel.messages.edit(streamMessages[key].msgId.id, {
-                    content: `${roleMention}`,
-                    embeds: [streamEmbedMsg],
-                    allowedMentions: {roles: [roleMention.id]}
-                });                                    
+            const messageExists = await checkMessageExists(msgChannel,streamMessages[key].msgId.id);
+            if(messageExists) {
+                if(guildSettings.roleToPing !== undefined && guildSettings.roleToPing !== 'none') {
+                    // roleMention = await g.roles.fetch(guildSettings.roleToPing);
+                    // roleMention = await guildId.roles.fetch(guildSettings.roleToPing);                
+                    let findGuild = await client.guilds.fetch(guildId);
+                    roleMention = await findGuild.roles.fetch(guildSettings.roleToPing);
+                    embedMsgContent = `${roleMention}`;
+                    msgChannel.messages.edit(streamMessages[key].msgId.id, {
+                        content: `${roleMention}`,
+                        embeds: [streamEmbedMsg],
+                        allowedMentions: {roles: [roleMention.id]}
+                    });                                    
+                }
+                else { msgChannel.messages.edit(streamMessages[key].msgId.id, {embeds: [streamEmbedMsg]}); }                                
+                let updatedMsgLog = `Updated activity (${guildId}-${streamUsername}-${streamPlatform}) message`;
+                console.log(updatedMsgLog);
+                log('info', logChannel, updatedMsgLog);
+                foundMessage = true;
+            } else { 
+                let updatedMsgLog = `Error finding message for activity (${guildId}-${streamUsername}-${streamPlatform}) message`;
+                console.log(updatedMsgLog);
+                log('error', logChannel, updatedMsgLog);                
+                // TODO - delete from stream messages object?
             }
-            else { msgChannel.messages.edit(streamMessages[key].msgId.id, {embeds: [streamEmbedMsg]}); }                                
-            let updatedMsgLog = `Updated activity (${guildId}-${streamUsername}-${streamPlatform}) message`;
-            console.log(updatedMsgLog);
-            log('info', logChannel, updatedMsgLog);
-            foundMessage = true;
         }
     }
     if(!foundMessage){
@@ -163,7 +180,6 @@ async function checkStreams() {
             const guildSettings = await getAllGuildSettings(g.id);
             console.log(`Checking streams for guild ${g.id}`);
             // twitch
-            console.log(guildSettings);
             if(guildSettings.twitchStreams !== undefined && guildSettings.notificationChannelId !== undefined) { // TODO - change to truthy?
                 for(let i = 0; i < guildSettings.twitchStreams.length; i++) {
                     if(twitchEnabled) { 
@@ -373,11 +389,11 @@ client.once('ready', async () => {
     
     // timers
 
-    // cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,1*40000); // 40 seconds
-    cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,10*60000); // 10 minutes (10*60000)
+    cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,1*40000); // 40 seconds
+    // cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,10*60000); // 10 minutes (10*60000)
     
-    // checkStreamsTimer = setInterval(checkStreams,1*30000); // 30 seconds (1*10000)
-    checkStreamsTimer = setInterval(checkStreams,10*60000); // 10 minutes (10*60000) 
+    checkStreamsTimer = setInterval(checkStreams,1*30000); // 30 seconds (1*10000)
+    // checkStreamsTimer = setInterval(checkStreams,10*60000); // 10 minutes (10*60000) 
     
 });
 

@@ -1,39 +1,90 @@
 const { EmbedBuilder, escapeMarkdown } = require('discord.js');
 const twitchApi = require('./twitchApi');
 
-async function streamingEmbed(twitchUsername, msgAuthor) {
-    try {
-        const twitchInfo = await twitchApi.getTwitchUserInfo(twitchUsername);
-        const streamInfo = await twitchApi.getStreamInfo(twitchUsername);
+async function getEmbedInfo(service, username) {
+    let embedInfo = {
+        color: null,
+        title: null,
+        url: null,
+        authorName: null,
+        authorIcon: null,
+        authorUrl: null,
+        description: null,
+        thumbnail: null,
+        image: null
+    };
+
+    if(service === 'kick') {
+        // TODO - get kick user info
+    } else { // default to twitch
+        const twitchInfo = await twitchApi.getTwitchUserInfo(username);
+        const streamInfo = await twitchApi.getStreamInfo(username);
         let urlTimestamp = Date.now();
         const thumbnailUrl = streamInfo.thumbnail_url.replace(`{width}x{height}.jpg`, `1920x1080.jpg?${urlTimestamp}`);
         let streamTitle = escapeMarkdown(streamInfo.title);
         let channelUrl = `https://twitch.tv/${twitchInfo.display_name}`;
 
-        const returnEmbed = new EmbedBuilder()
-        .setColor('#1EA8D7') // change this to use event color from channel info
-        .setTitle(streamTitle)
-        .setURL(channelUrl) // change this to get from twitchInfo 
-        .setAuthor({
-            name: `${twitchInfo.display_name} is live on Twitch`,
-            icon_url: twitchInfo.profile_image_url,
-            url: channelUrl
-        })
-        .setDescription(streamInfo.game_name)
-        .setThumbnail(twitchInfo.profile_image_url)
-        .setImage(thumbnailUrl) // change this to stream preview
-        .setTimestamp();
-        // .setFooter(`Last updated`);
-    
-        return returnEmbed;
+        // embedInfo.color = '#1EA8D7'; // TODO - change this to channel/username color from twitch api? 
+        embedInfo.color = '#9146FF'; // twitch purple 
+        embedInfo.title = streamTitle;
+        embedInfo.url = channelUrl;
+        embedInfo.authorName = `${twitchInfo.display_name} is live on Twitch`;
+        embedInfo.authorIcon = twitchInfo.profile_image_url;
+        embedInfo.authorUrl = channelUrl;
+        embedInfo.description = streamInfo.game_name;
+        embedInfo.thumbnail = twitchInfo.profile_image_url;
+        embedInfo.image = thumbnailUrl;
     }
-    catch(error) { 
+    return embedInfo;
+}
+
+async function streamingEmbed(twitchUsername, msgAuthor) { // TODO - add service to this and all references
+    try {
+        // const twitchInfo = await twitchApi.getTwitchUserInfo(twitchUsername);
+        // const streamInfo = await twitchApi.getStreamInfo(twitchUsername);
+        // let urlTimestamp = Date.now();
+        // const thumbnailUrl = streamInfo.thumbnail_url.replace(`{width}x{height}.jpg`, `1920x1080.jpg?${urlTimestamp}`);
+        // let streamTitle = escapeMarkdown(streamInfo.title);
+        // let channelUrl = `https://twitch.tv/${twitchInfo.display_name}`;
+
+        // const returnEmbed = new EmbedBuilder()
+        // .setColor('#1EA8D7') // change this to use event color from channel info
+        // .setTitle(streamTitle)
+        // .setURL(channelUrl) // change this to get from twitchInfo 
+        // .setAuthor({
+        //     name: `${twitchInfo.display_name} is live on Twitch`,
+        //     icon_url: twitchInfo.profile_image_url,
+        //     url: channelUrl
+        // })
+        // .setDescription(streamInfo.game_name)
+        // .setThumbnail(twitchInfo.profile_image_url)
+        // .setImage(thumbnailUrl) // change this to stream preview
+        // .setTimestamp();
+        // // .setFooter(`Last updated`);
+
+        const embedInfo = await getEmbedInfo('twitch', twitchUsername);
+        const returnEmbed = new EmbedBuilder()
+        .setColor(embedInfo.color) 
+        .setTitle(embedInfo.title)
+        .setURL(embedInfo.url) 
+        .setAuthor({
+            name: embedInfo.authorName,
+            icon_url: embedInfo.authorIcon,
+            url: embedInfo.authorUrl
+        })
+        .setDescription(embedInfo.description)
+        .setThumbnail(embedInfo.thumbnail)
+        .setImage(embedInfo.image) 
+        .setTimestamp();
+
+        return returnEmbed;
+    } catch(error) { 
         console.log(error); 
         return undefined;
     }
 }
 
-async function offlineStreamingEmbed(twitchUsername, msgAuthor) {
+async function offlineStreamingEmbed(twitchUsername, msgAuthor) { // TODO - move this to getEmbedInfo 
     try {
         const twitchInfo = await twitchApi.getTwitchUserInfo(twitchUsername);
         let channelUrl = `https://twitch.tv/${twitchInfo.display_name}`;

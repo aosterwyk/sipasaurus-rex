@@ -4,14 +4,12 @@ const botSettings = require('../botSettings.json');
 
 const dbPath = path.join(botSettings.dbLocation, 'guilds.db');
 const db = Nedb.create({ filename: dbPath });
-console.log(dbPath);
 
 async function getAllGuildSettings(guildId) {
 //   let guildSettings = {};
   try {
     // Query the database for all settings for this guildId
     const settings = await db.findOne({ id: guildId });
-    // console.log(settings);
 
     if(settings) {
         return settings;
@@ -28,13 +26,9 @@ async function getGuildSetting(guildId, setting) {
   try {
     // Query the database for a specific setting
     const result = await db.findOne({ id: guildId, key: setting });
-    console.log(`result`)
-    console.log(result)
     
     // Check if the setting was found
     if (result) {
-      console.log(`result.value`);
-      console.log(result.value);
       return result.value;
     } else {
       return undefined;
