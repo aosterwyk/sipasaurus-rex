@@ -13,6 +13,10 @@ const { getClipList, addClip } = require('./utils/clipList');
 const { getTwichClips, getStreamInfo } = require('./utils/twitchApi');
 const { getVStreamStreamInfo, refreshVStreamToken } = require('./utils/vStreamAPI');
 const { checkTwitchConnection } = require('./utils/checkTwitchConnection');
+const updateColonyMentionHandler = require('./commands/updateColony');
+const createColonyMentionHandler = require('./commands/createcolony');
+const editColonyMentionHandler = require('./commands/editColony');
+const deleteColonyMentionHandler = require('./commands/deleteColony');
 
 const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]});
 
@@ -422,5 +426,12 @@ client.on(Events.InteractionCreate, async interaction => {
             await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
         }
     }
+});
+
+client.on(Events.MessageCreate, async message => {
+    await createColonyMentionHandler(message, client);
+    await updateColonyMentionHandler(message, client);
+    await editColonyMentionHandler(message, client);
+    await deleteColonyMentionHandler(message, client);
 });
 

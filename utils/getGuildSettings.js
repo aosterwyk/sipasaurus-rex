@@ -6,8 +6,8 @@ const dbPath = path.join(botSettings.dbLocation, 'guilds.db');
 const db = Nedb.create({ filename: dbPath });
 
 async function getAllGuildSettings(guildId) {
-//   let guildSettings = {};
   try {
+    await db.loadDatabase(); // Force reload from disk before reading
     // Query the database for all settings for this guildId
     const settings = await db.findOne({ id: guildId });
 

@@ -58,12 +58,24 @@ async function setGuildSetting(guildSettingsFilename, setting, newValue) {
     console.log(`Updating setting in db...`);
 
     try {
+        let updateObj;
+        if (newValue === undefined) {
+            // Use $unset for deletion
+            updateObj = { $unset: { [setting]: true } };
+        } else {
+            // Use $set for update
+            updateObj = { $set: { [setting]: newValue } };
+        }
+        console.log('DB update object:', JSON.stringify(updateObj));
         const numAffected = await guildsDb.update(
             { id: guildSettingsFilename },
-            { $set: { [setting]: newValue }},
+            updateObj,
             { upsert: true}
         );
+        const updatedDoc = await guildsDb.findOne({ id: guildSettingsFilename });
+        console.log('Updated guild doc:', JSON.stringify(updatedDoc));
         console.log(`Updated ${numAffected} guild(s)`);
+        await guildsDb.compactDatafile(); // Compact DB after every save
         return true;
     } catch (error) {
         console.error('Error updating guild:', error);
