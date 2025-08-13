@@ -47,7 +47,7 @@ module.exports = async function(message, client) {
         // Save updated project to database
         await setGuildSetting(guildId, `projects.${channelId}`, project);
         // Update the summary message
-        let summary = `**${project.name}**\n`;
+        let summary = `__${project.name}__\n`;
         for (const [k, v] of Object.entries(project.items)) {
             if (v > 0) {
                 summary += `${k}: ${v}\n`;
