@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 <!-- _No unreleased changes_ -->
 
+## [0.999.1] - 2025-08-12
+### Added
+- Added item tracking for building colonies in Elite Dangerous
+
 ## [0.999.0] - 2025-04-01
 ### Changed
 - Changed twitch auth to use refresh/access tokens. **BREAKING CHANGE** You will need to add twitchSecret to bot settings for this change. 
