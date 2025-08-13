@@ -6,7 +6,7 @@ module.exports = async function(message, client) {
     if (message.author.bot || !message.content) return;
     if (!message.mentions.has(client.user)) return;
     if (message.author.id !== botSettings.botOwnerID) {
-        await message.reply({content: `Access denied.`});
+        // await message.reply({content: `Access denied.`});
         return;
     }
     const botMention = `<@${client.user.id}>`;
