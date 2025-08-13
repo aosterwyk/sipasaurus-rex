@@ -17,7 +17,7 @@ module.exports = async function(message, client) {
     // Always fetch fresh settings from DB
     const settings = await getAllGuildSettings(guildId);
     if (!settings.projects || !settings.projects[channelId]) {
-        await message.reply({content: `No project exists in this channel.\nCurrent projects: ${JSON.stringify(settings.projects)}` , ephemeral: true});
+        await message.reply({content: `No project exists in this channel.\nCurrent projects: ${JSON.stringify(settings.projects)}`});
         return;
     }
     const project = settings.projects[channelId];
@@ -28,5 +28,5 @@ module.exports = async function(message, client) {
     } catch (error) { /* ignore */ }
     // Remove project from DB
     await setGuildSetting(guildId, `projects.${channelId}`, undefined); // Use $unset for this channel
-    await message.reply({content: `Project deleted from this channel.`, ephemeral: true});
+    await message.reply({content: `Project deleted from this channel.`});
 }

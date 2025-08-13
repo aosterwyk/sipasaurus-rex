@@ -35,7 +35,7 @@ module.exports = async function(message, client) {
 
     // Check if this channel already has a project
     if (settings.projects && settings.projects[channelId]) {
-        await message.reply({content: `This channel already has a project. Delete it first or use a different channel.\nCurrent projects: ${JSON.stringify(settings.projects)}` , ephemeral: true});
+        await message.reply({content: `This channel already has a project. Delete it first or use a different channel.\nCurrent projects: ${JSON.stringify(settings.projects)}`});
         return;
     }
 
@@ -58,9 +58,11 @@ module.exports = async function(message, client) {
     }
 
     // Create summary message
-    let summary = `**${projectName}**\n`;
+    let summary = `__${projectName}__\n`;
     for(const [k, v] of Object.entries(items)) {
-        summary += `${k}: ${v}\n`;
+        if (v > 0) {
+            summary += `${k}: ${v}\n`;
+        }
     }
     const msg = await message.channel.send(summary);
 
@@ -72,5 +74,5 @@ module.exports = async function(message, client) {
     };
 
     await setGuildSetting(guildId, `projects.${channelId}`, projectData);
-    await message.reply({content: `Project "${projectName}" created in this channel!`, ephemeral: true});
+    await message.reply({content: `Project "${projectName}" created in this channel!`});
 }

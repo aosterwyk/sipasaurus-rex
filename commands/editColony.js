@@ -42,9 +42,11 @@ module.exports = async function(message, client) {
     project.items[itemKey] = Math.max(0, newValue);
     await setGuildSetting(guildId, `projects.${channelId}`, project);
     // Update summary message
-    let summary = `**${project.name}**\n`;
+    let summary = `__${project.name}__\n`;
     for (const [k, v] of Object.entries(project.items)) {
-        summary += `${k}: ${v}\n`;
+        if (v > 0) {
+            summary += `${k}: ${v}\n`;
+        }
     }
     try {
         const summaryMsg = await message.channel.messages.fetch(project.messageId);
