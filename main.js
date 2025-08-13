@@ -14,7 +14,7 @@ const { getTwichClips, getStreamInfo } = require('./utils/twitchApi');
 const { getVStreamStreamInfo, refreshVStreamToken } = require('./utils/vStreamAPI');
 const { checkTwitchConnection } = require('./utils/checkTwitchConnection');
 const updateColonyMentionHandler = require('./commands/updateColony');
-const createColonyMentionHandler = require('./commands/createcolony');
+const createColonyMentionHandler = require('./commands/createColony');
 const editColonyMentionHandler = require('./commands/editColony');
 const deleteColonyMentionHandler = require('./commands/deleteColony');
 
