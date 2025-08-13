@@ -393,11 +393,11 @@ client.once('ready', async () => {
     
     // timers
 
-    cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,1*40000); // 40 seconds
-    // cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,10*60000); // 10 minutes (10*60000)
+    // cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,1*40000); // 40 seconds
+    cleanupStreamEmbedsTimer = setInterval(cleanupStreamEmbeds,10*60000); // 10 minutes (10*60000)
     
-    checkStreamsTimer = setInterval(checkStreams,1*30000); // 30 seconds (1*10000)
-    // checkStreamsTimer = setInterval(checkStreams,10*60000); // 10 minutes (10*60000) 
+    // checkStreamsTimer = setInterval(checkStreams,1*30000); // 30 seconds (1*10000)
+    checkStreamsTimer = setInterval(checkStreams,10*60000); // 10 minutes (10*60000) 
     
 });
 

@@ -25,7 +25,7 @@ module.exports = async function(message, client) {
     // Always fetch fresh settings from DB
     const settings = await getAllGuildSettings(guildId);
     if (!settings.projects || !settings.projects[channelId]) {
-        await message.reply({content: `No project exists in this channel.\nCurrent projects: ${JSON.stringify(settings.projects)}` , ephemeral: true});
+        await message.reply({content: `No project exists in this channel.`});
         return;
     }
     const project = settings.projects[channelId];
@@ -49,7 +49,7 @@ module.exports = async function(message, client) {
     try {
         const summaryMsg = await message.channel.messages.fetch(project.messageId);
         await summaryMsg.edit(summary);
-        await message.reply({content: `Set ${itemKey} to ${project.items[itemKey]}.`, ephemeral: true});
+        await message.reply({content: `Set ${itemKey} to ${project.items[itemKey]}.`});
     } catch (error) {
         await message.reply({content: `Item updated, but failed to update summary message.`});
     }

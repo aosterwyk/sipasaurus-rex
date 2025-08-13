@@ -28,7 +28,7 @@ module.exports = async function(message, client) {
         // Get project for this channel
         const project = projects[channelId];
         if (!project) {
-            await message.reply({content: `No project exists in this channel.\nCurrent projects: ${JSON.stringify(projects)}` , ephemeral: true});
+            await message.reply({content: `No project exists in this channel.` , ephemeral: true});
             return;
         }
         // Fuzzy match item
@@ -38,7 +38,7 @@ module.exports = async function(message, client) {
                       Object.keys(project.items).find(k => k.toLowerCase().includes(itemNameRaw));
         }
         if (!itemKey) {
-            await message.reply({content: `Item not found.`});
+            await message.reply({content: `Item not found.`, ephemeral: true});
             return;
         }
         // Remove from the count
@@ -55,7 +55,7 @@ module.exports = async function(message, client) {
             const summaryMsg = await message.channel.messages.fetch(project.messageId);
             await summaryMsg.edit(summary);
             await message.react('✅');
-            await message.reply({content: `Project updated.`, ephemeral: true});
+            // await message.reply({content: `Project updated.`, ephemeral: true});
         } catch (error) {
             console.error('Error updating project summary message:', error);
             await message.react('❌');
