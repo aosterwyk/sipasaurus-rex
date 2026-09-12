@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, GatewayIntentBits, Events, Collection, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, Events, Collection, ActivityType, MessageFlags } = require('discord.js');
 const botSettings = require('./botSettings.json');
 const { streamingEmbed, offlineStreamingEmbed } = require('./utils/streamingEmbed');
 const { vStreamStreamEmbedMsg, vStreamOfflineEmbedMsg } = require('./utils/vStreamStreamingEmbed');
@@ -364,7 +364,7 @@ for (const file of commandFiles) {
     }
 }
 
-client.once('ready', async () => {
+client.once('clientReady', async () => {
     console.log(`${client.user.username} connected`);
     if(botSettings.activity !== undefined) {
         client.user.setActivity( `${botSettings.activity} | ${version}`, {type: ActivityType.Watching});
@@ -420,10 +420,10 @@ client.on(Events.InteractionCreate, async interaction => {
     catch(error) {
         console.error(error);
         if(interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+            await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
         }
         else {
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
         }
     }
 });

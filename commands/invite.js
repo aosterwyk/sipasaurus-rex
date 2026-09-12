@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -6,7 +6,7 @@ module.exports = {
         .setDescription('link to add me to a server'),
     async execute(interaction) {
         const inviteUrl = `https://discordapp.com/oauth2/authorize?client_id=${interaction.client.user.id}&scope=bot&permissions=2147994688`; 
-        await interaction.reply({ content: `Add me to your server: ${inviteUrl}`, ephemeral: true }); 
+        await interaction.reply({ content: `Add me to your server: ${inviteUrl}`, flags: MessageFlags.Ephemeral }); 
         return; 
     },
 };

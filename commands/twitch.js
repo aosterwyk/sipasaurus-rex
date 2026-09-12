@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { setGuildSetting } = require('../utils/setGuildSetting');
 const { getGuildSetting } = require('../utils/getGuildSettings');
 const { getTwitchUserInfo } = require('../utils/twitchApi');
@@ -28,7 +28,7 @@ module.exports = {
     async execute(interaction) {
         if(interaction.user.id != interaction.guild.ownerId) {
             if(interaction.user.id != botSettings.botOwnerID) {
-                await interaction.reply({content: `Command restricted to guild or bot owner.`, ephemeral: true});
+                await interaction.reply({content: `Command restricted to guild or bot owner.`, flags: MessageFlags.Ephemeral});
                 return;
             }
         }
@@ -48,13 +48,13 @@ module.exports = {
             try {          
                 await discordChannel.send(testMsg);  
                 await setGuildSetting(guildId, 'notificationChannelId', discordChannel.id); 
-                await interaction.reply({ content: `:white_check_mark: Set stream live notifications channel to ${discordChannel} (ID: ${discordChannel.id}) \nTest message sent to channel.`, ephemeral: true});
+                await interaction.reply({ content: `:white_check_mark: Set stream live notifications channel to ${discordChannel} (ID: ${discordChannel.id}) \nTest message sent to channel.`, flags: MessageFlags.Ephemeral});
                 console.log(`Set stream notifications channel for guild ${guildId} to ${discordChannel.id}`);                    
             }
             catch(error) {
-                let testMsgError = `Error setting stream notification channel to ${$discordChannel} (${$discordChannel.id}) in guild ${guildId}. \n${error}`;
+                let testMsgError = `Error setting stream notification channel to ${discordChannel} (${discordChannel.id}) in guild ${guildId}. \n${error}`;
                 console.log(testMsgError);
-                await interaction.reply({ content: testMsgError, ephemeral: true});                
+                await interaction.reply({ content: testMsgError, flags: MessageFlags.Ephemeral});                
             }
         }       
 
@@ -69,7 +69,7 @@ module.exports = {
                         if(twitchStreamsList.includes(twitchStream)) {
                             let returnMsg = `:warning: ${twitchUserCheck.display_name} already exists in streams list`;
                             console.log(returnMsg);
-                            await interaction.reply({ content: returnMsg, ephemeral: true});
+                            await interaction.reply({ content: returnMsg, flags: MessageFlags.Ephemeral});
                         }
                         else {
                             twitchStreamsList.push(twitchStream);
@@ -77,17 +77,17 @@ module.exports = {
                             console.log(returnMsg);
                             const streamNotificationChannel = await getGuildSetting(guildId,'notificationChannelId');
                             if(streamNotificationChannel) {
-                                await interaction.reply({ content: returnMsg, ephemeral: true});     
+                                await interaction.reply({ content: returnMsg, flags: MessageFlags.Ephemeral});     
                             }
                             else {
-                                await interaction.reply({ content: `${returnMsg} \nHint: Use /twitch discordchannel to set a channel for live notifications.`, ephemeral: true});     
+                                await interaction.reply({ content: `${returnMsg} \nHint: Use /twitch discordchannel to set a channel for live notifications.`, flags: MessageFlags.Ephemeral});     
                             }
                         }
                     }
                     else { 
                         console.log(`twitchStreams does not exist in guild settings for ${guildId}`);
                         twitchStreamsList = [twitchStream];
-                        await interaction.reply({ content: `:white_check_mark: ${twitchUserCheck.display_name} added to list \nHint: Use /twitch discordchannel to set a channel for live notifications. \nhttps://twitch.tv/${twitchUserCheck.display_name}`, ephemeral: true});                                                                           
+                        await interaction.reply({ content: `:white_check_mark: ${twitchUserCheck.display_name} added to list \nHint: Use /twitch discordchannel to set a channel for live notifications. \nhttps://twitch.tv/${twitchUserCheck.display_name}`, flags: MessageFlags.Ephemeral});                                                                           
                     }
                     await setGuildSetting(guildId, 'twitchStreams', twitchStreamsList);
                     console.log(`Updated twitchStreams for guild ${guildId} to ${twitchStreamsList}`);
@@ -95,13 +95,13 @@ module.exports = {
                 else { 
                     let returnMsg = `:no_entry_sign: ${twitchStream} is not a valid twitch user`;
                     console.log(returnMsg);
-                    await interaction.reply({ content: returnMsg, ephemeral: true});
+                    await interaction.reply({ content: returnMsg, flags: MessageFlags.Ephemeral});
                 }                                        
             }
             else { 
                 let returnMsg = ':warning: twitch username must be at least 5 characters';
                 console.log(returnMsg);
-                await interaction.reply({ content: returnMsg, ephemeral: true});                
+                await interaction.reply({ content: returnMsg, flags: MessageFlags.Ephemeral});                
             }
         }
 
@@ -117,21 +117,21 @@ module.exports = {
 
                         let returnMsg = `:white_check_mark: ${removeTwitchStream} removed from list`;
                         console.log(returnMsg);
-                        await interaction.reply({ content: returnMsg, ephemeral: true});
+                        await interaction.reply({ content: returnMsg, flags: MessageFlags.Ephemeral});
                         await setGuildSetting(guildId, 'twitchStreams', twitchStreamsList);
                         console.log(`Updated twitchStreams for guild ${guildId} to ${twitchStreamsList}`);                                                                                    
                     }
                     else {            
                         let returnMsg = `:warning: ${removeTwitchStream} is not in list`;
                         console.log(returnMsg);
-                        await interaction.reply({ content: returnMsg, ephemeral: true}); 
+                        await interaction.reply({ content: returnMsg, flags: MessageFlags.Ephemeral}); 
                     }
                 }
             }
             else { 
                 let returnMsg = ':warning: twitch username must be at least 5 characters';
                 console.log(returnMsg);
-                await interaction.reply({ content: returnMsg, ephemeral: true});                
+                await interaction.reply({ content: returnMsg, flags: MessageFlags.Ephemeral});                
             }
         }
 
@@ -140,18 +140,18 @@ module.exports = {
             if(mentionEnabled) { // this doesn't actually do anything. setting a role enables the mentions. 
                 // await setGuildSetting(guildId, 'roleToPing');
                 // console.log(`Enabled mentions for guild ${guildId}.`);
-                await interaction.reply({ content: `:white_check_mark: Hint: use /twitch role <@role> to set a role`, ephemeral: true});
+                await interaction.reply({ content: `:white_check_mark: Hint: use /twitch role <@role> to set a role`, flags: MessageFlags.Ephemeral});
             }
             else {
                 await setGuildSetting(guildId, 'roleToPing', 'none');
                 console.log(`Disabled mentions for guild ${guildId}.`);
-                await interaction.reply({ content: ':white_check_mark: Disabled role mentions', ephemeral: true});
+                await interaction.reply({ content: ':white_check_mark: Disabled role mentions', flags: MessageFlags.Ephemeral});
             }
         }
 
         if(mentionRole) {
             await setGuildSetting(guildId, 'roleToPing', mentionRole.id);
-            await interaction.reply({ content: `:white_check_mark: Set ${mentionRole} to live notifications mention role`, ephemeral: true});
+            await interaction.reply({ content: `:white_check_mark: Set ${mentionRole} to live notifications mention role`, flags: MessageFlags.Ephemeral});
             console.log(`Set ${mentionRole} to live notifications mention role for guild ${guildId}`);
         }
     },

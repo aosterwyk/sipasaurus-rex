@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { helpEmbed } = require('../utils/helpEmbed');
 
 module.exports = {
@@ -7,7 +7,7 @@ module.exports = {
         .setDescription('Sipa commands'),
     async execute(interaction) {
         const helpMsg = await helpEmbed(interaction.user.username);
-        await interaction.reply({embeds: [helpMsg], ephemeral: true});
+        await interaction.reply({embeds: [helpMsg], flags: MessageFlags.Ephemeral});
         return;
     },
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { setGuildSetting } = require('../utils/setGuildSetting');
 const botSettings = require('../botSettings.json');
 
@@ -20,7 +20,7 @@ module.exports = {
     async execute(interaction) {
         if(interaction.user.id != interaction.guild.ownerId) {
             if(interaction.user.id != botSettings.botOwnerID) {
-                await interaction.reply({content: `Command restricted to guild or bot owner.`, ephemeral: true});
+                await interaction.reply({content: `Command restricted to guild or bot owner.`, flags: MessageFlags.Ephemeral});
                 return;
             }
         }
@@ -35,13 +35,13 @@ module.exports = {
         if(clipsEnabled !== undefined && clipsEnabled !== null) {
             if(clipsEnabled) {
                 await setGuildSetting(guildId, 'checkTwitchClips', true);
-                // await interaction.reply({ content: `Clip messages enabled`, ephemeral: true});
+                // await interaction.reply({ content: `Clip messages enabled`, flags: MessageFlags.Ephemeral});
                 replyMsg += `Clip messages enabled\n`;
                 console.log(`Enabled clips for guild ${guildId}`);
             }
             else {
                 await setGuildSetting(guildId, 'checkTwitchClips', false);
-                // await interaction.reply({ content: `Clip messages disabled`, ephemeral: true});
+                // await interaction.reply({ content: `Clip messages disabled`, flags: MessageFlags.Ephemeral});
                 replyMsg += `Clip messages disabled\n`;
                 console.log(`Disbaled clips for guild ${guildId}`);
             }
@@ -51,7 +51,7 @@ module.exports = {
             await setGuildSetting(guildId, 'checkTwitchClips', true);            
             // set clips message channel
             await setGuildSetting(guildId, 'discordClipsChannel', interaction.channelId);
-            // interaction.reply({ content: `Set clips channel to ${clipsDiscordChannel}`, ephemeral: true});
+            // interaction.reply({ content: `Set clips channel to ${clipsDiscordChannel}`, flags: MessageFlags.Ephemeral});
             replyMsg += `Set clips channel to ${clipsDiscordChannel}\n`;
             console.log(`Set clips channel for guild ${guildId} to ${clipsDiscordChannel}`);
             // clipsDiscordChannel.send("I'll start posting clips in this channel.");
@@ -59,9 +59,9 @@ module.exports = {
         if(clipsTwitchChannel) {
             await setGuildSetting(guildId, 'twitchClipsChannel', clipsTwitchChannel);
             console.log(`Set clips user for guild ${guildId} to ${clipsTwitchChannel}`);
-            // await interaction.reply({ content: `Set twitch channel to https://twitch.tv/${clipsTwitchChannel}`, ephemeral: true});
+            // await interaction.reply({ content: `Set twitch channel to https://twitch.tv/${clipsTwitchChannel}`, flags: MessageFlags.Ephemeral});
             replyMsg += `Set twitch channel to https://twitch.tv/${clipsTwitchChannel}\n`;
         }
-        await interaction.reply({ content: replyMsg, ephemeral: true});
+        await interaction.reply({ content: replyMsg, flags: MessageFlags.Ephemeral});
     },
 };

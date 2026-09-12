@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const botSettings = require('../botSettings.json');
 
 module.exports = {
@@ -11,7 +11,7 @@ module.exports = {
             return;
         }
         else {
-            await interaction.reply({content: `Command restricted to bot owner.`, ephemeral: true});
+            await interaction.reply({content: `Command restricted to bot owner.`, flags: MessageFlags.Ephemeral});
             return;
         }
     },

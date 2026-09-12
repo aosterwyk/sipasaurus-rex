@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const botSettings = require('../botSettings.json');
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
         }
         else {
             // still reply, but only reply to the user that send the command
-            await interaction.reply({ content: replyMsg, ephemeral: true });
+            await interaction.reply({ content: replyMsg, flags: MessageFlags.Ephemeral });
             return;
         }
     },

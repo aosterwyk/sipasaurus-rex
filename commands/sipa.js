@@ -1,4 +1,4 @@
-const { SlashCommandBuilder,PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder,PermissionFlagsBits, MessageFlags } = require('discord.js');
 const botSettings = require('../botSettings.json');
 const { checkTwitchConnection } = require('../utils/checkTwitchConnection');
 const { getVStreamChannelInfo } = require('../utils/vStreamAPI');
@@ -26,7 +26,7 @@ module.exports = {
         if(interaction.user.id == botSettings.botOwnerID) {
             if(interaction.options.getSubcommand() === 'twitchtoken') {
                 const tokenUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${botSettings.twitchClientId}&redirect_uri=https://acceptdefaults.com/twitch-oauth-token-generator/&response_type=token&scope=user:read:broadcast`;
-                await interaction.reply({content: `<${tokenUrl}>`, ephemeral: true});
+                await interaction.reply({content: `<${tokenUrl}>`, flags: MessageFlags.Ephemeral});
                 return;
             }
             if(interaction.options.getSubcommand() === 'twitchtokentest') {
@@ -56,7 +56,7 @@ module.exports = {
             }
         }
         else {
-            await interaction.reply({content: `Command restricted to bot owner.`, ephemeral: true});
+            await interaction.reply({content: `Command restricted to bot owner.`, flags: MessageFlags.Ephemeral});
             return;
         }
     },
