@@ -1,6 +1,5 @@
 const botSettings = require('../botSettings.json');
-const { setGuildSetting } = require('../utils/setGuildSetting');
-const { getAllGuildSettings } = require('../utils/getGuildSettings');
+const { getColonyProjects, setColonyProject } = require('../utils/colonyProjects');
 
 module.exports = async function(message, client) {
     if (message.author.bot || !message.content) return;
@@ -30,12 +29,12 @@ module.exports = async function(message, client) {
     const itemsRaw = match[2];
     const channelId = message.channel.id;
     const guildId = message.guild.id;
-    // Always fetch fresh settings from DB
-    const settings = await getAllGuildSettings(guildId);
+    // Always fetch fresh projects from file
+    const projects = await getColonyProjects(guildId);
 
     // Check if this channel already has a project
-    if (settings.projects && settings.projects[channelId]) {
-        await message.reply({content: `This channel already has a project. Delete it first or use a different channel.\nCurrent projects: ${JSON.stringify(settings.projects)}`});
+    if (projects[channelId]) {
+        await message.reply({content: `This channel already has a project. Delete it first or use a different channel.\nCurrent projects: ${JSON.stringify(projects)}`});
         return;
     }
 
@@ -73,6 +72,6 @@ module.exports = async function(message, client) {
         items: items
     };
 
-    await setGuildSetting(guildId, `projects.${channelId}`, projectData);
+    await setColonyProject(guildId, channelId, projectData);
     await message.reply({content: `Project "${projectName}" created in this channel!`});
 }

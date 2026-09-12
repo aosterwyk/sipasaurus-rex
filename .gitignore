@@ -1,4 +1,5 @@
 node_modules/
+.claude/
 botSettings.json 
 clipList.sipa
 vStreamTokens.json

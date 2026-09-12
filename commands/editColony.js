@@ -1,6 +1,5 @@
 const botSettings = require('../botSettings.json');
-const { getAllGuildSettings } = require('../utils/getGuildSettings');
-const { setGuildSetting } = require('../utils/setGuildSetting');
+const { getColonyProjects, setColonyProject } = require('../utils/colonyProjects');
 
 module.exports = async function(message, client) {
     if (message.author.bot || !message.content) return;
@@ -22,13 +21,13 @@ module.exports = async function(message, client) {
     const newValue = parseInt(match[2]);
     const channelId = message.channel.id;
     const guildId = message.guild.id;
-    // Always fetch fresh settings from DB
-    const settings = await getAllGuildSettings(guildId);
-    if (!settings.projects || !settings.projects[channelId]) {
+    // Always fetch fresh projects from file
+    const projects = await getColonyProjects(guildId);
+    if (!projects[channelId]) {
         await message.reply({content: `No project exists in this channel.`});
         return;
     }
-    const project = settings.projects[channelId];
+    const project = projects[channelId];
     // Fuzzy match item
     let itemKey = Object.keys(project.items).find(k => k.toLowerCase() === itemNameRaw);
     if (!itemKey) {
@@ -40,7 +39,7 @@ module.exports = async function(message, client) {
         return;
     }
     project.items[itemKey] = Math.max(0, newValue);
-    await setGuildSetting(guildId, `projects.${channelId}`, project);
+    await setColonyProject(guildId, channelId, project);
     // Update summary message
     let summary = `__${project.name}__\n`;
     for (const [k, v] of Object.entries(project.items)) {

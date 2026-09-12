@@ -1,5 +1,4 @@
-const { getAllGuildSettings } = require('../utils/getGuildSettings');
-const { setGuildSetting } = require('../utils/setGuildSetting');
+const { getColonyProjects, setColonyProject } = require('../utils/colonyProjects');
 
 module.exports = async function(message, client) {
     if (message.author.bot || !message.content) return;
@@ -19,11 +18,9 @@ module.exports = async function(message, client) {
 
     const channelId = message.channel.id;
     const guildId = message.guild.id;
-    // Always fetch fresh settings from DB
-    const settings = await getAllGuildSettings(guildId);
-    console.log('UpdateColony: guildId:', guildId, 'channelId:', channelId, 'settings.projects:', JSON.stringify(settings.projects));
-    // Defensive: ensure settings.projects exists
-    const projects = settings.projects || {};
+    // Always fetch fresh projects from file
+    const projects = await getColonyProjects(guildId);
+    console.log('UpdateColony: guildId:', guildId, 'channelId:', channelId, 'projects:', JSON.stringify(projects));
     try {
         // Get project for this channel
         const project = projects[channelId];
@@ -44,8 +41,8 @@ module.exports = async function(message, client) {
         // Remove from the count
         project.items[itemKey] -= amount;
         if (project.items[itemKey] < 0) project.items[itemKey] = 0;
-        // Save updated project to database
-        await setGuildSetting(guildId, `projects.${channelId}`, project);
+        // Save updated project to file
+        await setColonyProject(guildId, channelId, project);
         // Update the summary message
         let summary = `__${project.name}__\n`;
         for (const [k, v] of Object.entries(project.items)) {
