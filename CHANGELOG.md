@@ -18,11 +18,14 @@ No unreleased changes
 ### Fixed
 - `deployCommands.js` no longer crashes on command files that don't export a slash command (e.g. the Elite Dangerous colony message handlers).
 
-## [0.999.1] - 2025-08-12
+### Removed
+- Removed all vStream commands and references. It was fun. 
+
+## 0.999.1 - 2025-08-12
 ### Added
 - Added item tracking for building colonies in Elite Dangerous
 
-## [0.999.0] - 2025-04-01
+## 0.999.0 - 2025-04-01
 ### Changed
 - Changed twitch auth to use refresh/access tokens. **BREAKING CHANGE** You will need to add twitchSecret to bot settings for this change. 
 
@@ -108,8 +111,6 @@ No unreleased changes
 ### Initial Release
 
 [0.999.2]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.999.2
-[0.999.1]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.999.1
-[0.999.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.999.0
 [0.8.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.8.0
 [0.7.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.7.0
 [0.6.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.6.0

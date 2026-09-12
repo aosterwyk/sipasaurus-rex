@@ -3,7 +3,6 @@ const path = require('node:path');
 const { Client, GatewayIntentBits, Events, Collection, ActivityType, MessageFlags } = require('discord.js');
 const botSettings = require('./botSettings.json');
 const { streamingEmbed, offlineStreamingEmbed } = require('./utils/streamingEmbed');
-const { vStreamStreamEmbedMsg, vStreamOfflineEmbedMsg } = require('./utils/vStreamStreamingEmbed');
 const { getGuildSetting, getAllGuildSettings } = require('./utils/getGuildSettings');
 const { setGuildSetting } = require('./utils/setGuildSetting');
 const { getStreamMessages, writeStreamMessages } = require('./utils/streamMessages');
@@ -11,7 +10,6 @@ const { log } = require('./utils/log');
 const version = require('./package.json').version;
 const { getClipList, addClip } = require('./utils/clipList');
 const { getTwichClips, getStreamInfo } = require('./utils/twitchApi');
-const { getVStreamStreamInfo, refreshVStreamToken } = require('./utils/vStreamAPI');
 const { checkTwitchConnection } = require('./utils/checkTwitchConnection');
 const updateColonyMentionHandler = require('./commands/updateColony');
 const createColonyMentionHandler = require('./commands/createColony');
@@ -25,10 +23,8 @@ const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 var twitchEnabled = true;
-var vStreamEnabled = false;
 
 var cleanupStreamEmbedsTimer;
-var refreshVStreamTokenTimer;
 var logChannel = null;
 var clipsCheckTime = 60*60000; // default to 1 hour
 var clipsChecker; 
@@ -62,28 +58,6 @@ async function cleanupStreamEmbeds() {
                         else { log('info', logChannel, `Channel ${streamMessages[x].streamUsername} is still live. Moving to next object in list.`); }
                     }
                     else { console.log('twitch disabled. Skipping.'); }
-                }
-                if(streamMessages[x].streamPlatform === 'vStream') {
-                    // TODO - this assumes the token is valid which is a bad fucking idea ¯\_(ツ)_/¯
-                    if(vStreamEnabled) {
-                        const isChannelLive = await getVStreamStreamInfo(streamMessages[x].streamUsername);              
-                        if(isChannelLive === null) { // this does not work like twitch
-                            log('info', logChannel, `Stream ${streamMessages[x].streamUsername} is offline. Changing message to offline embed.`);            
-                            const offlineStreamingEmbedMsg = await vStreamOfflineEmbedMsg(streamMessages[x].streamUsername);
-                            try {
-                                const cleanupGuild = client.guilds.resolve(streamMessages[x].guildId);
-                                const cleanupGuildChannelId = client.channels.resolveId(streamMessages[x].msgId.channelId); // not needed. prevents crash if the channel is deleted. 
-                                const cleanupChannelManager = cleanupGuild.channels;
-                                const cleanupMsgChannel = cleanupChannelManager.resolve(streamMessages[x].msgId.channelId);
-                                const cleanupMsgId = await cleanupMsgChannel.fetch(streamMessages[x].msgId.id); // not needed. prevents crash if the message is deleted.                         
-                                await cleanupMsgChannel.messages.edit(streamMessages[x].msgId.id, {embeds: [offlineStreamingEmbedMsg]});
-                            }
-                            catch(error) { log('error', logChannel, `Error cleaning up streaming message. ${error}`); }
-                            delete streamMessages[x];
-                        }
-                        else { log('info', logChannel, `Channel ${streamMessages[x].streamUsername} is still live. Moving to next object in list.`); }                    
-                    }
-                    else { console.log('vStream disabled. Skipping'); }
                 }
             }
         }
@@ -277,39 +251,7 @@ async function checkStreams() {
                 }                                    
             }
             else { console.log(`twitchStreams or notificationChannelId not set in guild ${g}. Skipping`); }
-            // // vStream
-            if(vStreamEnabled) {
-                if(guildSettings.vStreamStreams !== undefined && guildSettings.notificationChannelId !== undefined) {
-                    for(let i = 0; i < guildSettings.vStreamStreams.length; i++) {
-                        console.log(`[vstream]Checking stream ${guildSettings.vStreamStreams[i]}`);
-                        const vStreamStreamOnline = await getVStreamStreamInfo(guildSettings.vStreamStreams[i]);
-                        if(vStreamStreamOnline) {
-                            try {
-                                const actChannelManager = g.channels;
-                                const msgChannel = actChannelManager.resolve(guildSettings.notificationChannelId);
-                                let activityUsername = guildSettings.vStreamStreams[i]; // TODO - remove this now that it's not using activity 
-                                const vStreamEmbedMsg = await vStreamStreamEmbedMsg(guildSettings.vStreamStreams[i], activityUsername);
-                                if(vStreamEmbedMsg !== undefined && msgChannel !== undefined) {
-                                    if(msgChannel !== null) {
-                                        await updateStreamEmbeds(guildSettings.vStreamStreams[i],guildSettings,g.id,msgChannel,vStreamEmbedMsg,'vStream');                                        
-                                    }
-                                    await writeStreamMessages(streamMessages);
-                                    streamMessages = await getStreamMessages();                                             
-                                }
-
-                            }
-                            catch(error) {
-                                console.log(`Error creating streaming embed message: ${error}`);
-                                log('error', logChannel, `Error creating streaming embed message: ${error}`);
-                            } 
-                        }
-                        else { console.log(`[vstream]${guildSettings.vStreamStreams[i]} is not streaming.`); }
-                    }
-                }
-                else { console.log(`vStreamStreams or notificationChannelId not set in guild ${g}. Skipping`); }
-            }
-            else { console.log('vStream disabled. Skipping.'); }
-        });            
+        });
     }
     catch(error) {
         console.log(error);

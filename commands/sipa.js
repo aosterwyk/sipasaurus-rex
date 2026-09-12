@@ -1,7 +1,6 @@
 const { SlashCommandBuilder,PermissionFlagsBits, MessageFlags } = require('discord.js');
 const botSettings = require('../botSettings.json');
 const { checkTwitchConnection } = require('../utils/checkTwitchConnection');
-const { getVStreamChannelInfo } = require('../utils/vStreamAPI');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,11 +15,6 @@ module.exports = {
             subcommand
                 .setName('twitchtokentest')
                 .setDescription('Test Twitch token'))
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('vstreamtokentest')
-                .setDescription('Test vStream token'))
-                                
         ,
     async execute(interaction) {
         if(interaction.user.id == botSettings.botOwnerID) {
@@ -39,18 +33,6 @@ module.exports = {
                     const tokenUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${botSettings.twitchClientId}&redirect_uri=https://acceptdefaults.com/twitch-oauth-token-generator/&response_type=token&scope=user:read:broadcast`;
                     checkMsg += `:no_entry_sign: Renew token <${tokenUrl}>`; 
                 }
-                await interaction.reply(checkMsg);
-                return;
-            }
-            if(interaction.options.getSubcommand() === 'vstreamtokentest') {
-                const vStreamTokenTest = await getVStreamChannelInfo('varixx');
-                let checkMsg = `vStream token status: `;
-                if(vStreamTokenTest) {
-                    checkMsg += `:white_check_mark:`;
-                }
-                else {
-                    checkMsg += `:no_entry_sign: TODO - renew token if you get this message`; 
-                }                    
                 await interaction.reply(checkMsg);
                 return;
             }
