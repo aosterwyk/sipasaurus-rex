@@ -12,7 +12,12 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
-	commands.push(command.data.toJSON());
+	if ('data' in command && 'execute' in command) {
+		commands.push(command.data.toJSON());
+	}
+	else {
+		console.log(`[WARNING] The command at ./commands/${file} is missing a required "data" or "execute" property. Skipping.`);
+	}
 }
 
 // Construct and prepare an instance of the REST module

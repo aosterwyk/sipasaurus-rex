@@ -1,32 +1,67 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 const version = require('../package.json').version;
 
-async function helpEmbed(requestedBy){
+// Commands that shouldn't show up in guild-facing help (bot-wide/owner-only settings, or help itself)
+const excludedFromHelp = ['sipa', 'help'];
+
+function formatOption(option) {
+    const required = option.required ? ' (required)' : '';
+    return `\`${option.name}\`${required} - ${option.description}`;
+}
+
+function subcommandsOf(data) {
+    return (data.options || []).filter(option => option.type === ApplicationCommandOptionType.Subcommand);
+}
+
+function commandSummaryField(data) {
+    const subcommands = subcommandsOf(data);
+    if(subcommands.length > 0) {
+        const subcommandNames = subcommands.map(sub => sub.name).join(', ');
+        return { name: `/${data.name}`, value: `${data.description}\nSubcommands: ${subcommandNames}` };
+    }
+    return { name: `/${data.name}`, value: data.description || '​' };
+}
+
+function commandDetailFields(data) {
+    const subcommands = subcommandsOf(data);
+    if(subcommands.length > 0) {
+        return subcommands.map(sub => {
+            const optionLines = (sub.options || []).map(formatOption);
+            const value = optionLines.length > 0 ? `${sub.description}\n${optionLines.join('\n')}` : sub.description;
+            return { name: `/${data.name} ${sub.name}`, value };
+        });
+    }
+    const optionLines = (data.options || []).map(formatOption);
+    const value = optionLines.length > 0 ? `${data.description}\n${optionLines.join('\n')}` : data.description;
+    return [{ name: `/${data.name}`, value }];
+}
+
+async function helpEmbed(commands, focusCommandName) {
     try {
-        const helpEmbed = new EmbedBuilder()
-        .setColor('#ffff00')
-        // .setTitle('Help')
-        .setDescription('Help')
-        .addFields([
-            { name: 'invite', value: 'Invite URL to send this bot to your Discord server.'},
-            // clips
-            { name: '\u200B', value: '\u200B' },
-            { name: 'clips', value: '\u200B'},
-            { name: 'enabled <true/false>', value: 'Enable/disable messsages when a new Twitch clip is created'},
-            { name: 'channel <#discord-channel-name>', value: 'Discord channel for clips'},
-            { name: 'twitchchannel <twitch channel name>', value: 'Twitch channel to monitor for clips'},
-            // twitch
-            { name: '\u200B', value: '\u200B' },
-            { name: 'twitch', value: '\u200B'},
-            { name: 'enabled <true/false>', value: 'Enable/disable messages when channels go live on Twitch'},
-            { name: 'add/remove <twitch username>', value: 'Add/remove channels to list. Useranme only. Do not use the full URL.'},
-            { name: 'discordchannel <#discord-channel-name>', value: 'Discord channel for live notificaions'},
-            { name: 'mention <true/false>', value: 'Enable/disable mentioning a role in live notifications'},
-            { name: 'role <@role>', value: 'Role to mention in live notifications'}       
-        ])
-        .setTimestamp()
-        .setFooter({ text: `Sipasaurus Rex v${version}`});
-        return helpEmbed;
+        const embed = new EmbedBuilder()
+            .setColor('#ffff00')
+            .setTimestamp()
+            .setFooter({ text: `Sipasaurus Rex v${version}` });
+
+        if(focusCommandName) {
+            const command = commands.get(focusCommandName);
+            if(!command || excludedFromHelp.includes(focusCommandName)) {
+                embed.setDescription(`Unknown command: \`${focusCommandName}\``);
+                return embed;
+            }
+            embed.setDescription(`Help for \`/${focusCommandName}\``);
+            embed.addFields(commandDetailFields(command.data.toJSON()));
+        }
+        else {
+            embed.setDescription('Sipa commands\nUse `/help command:<name>` for detailed usage on a specific command.');
+            const fields = [];
+            for(const [name, command] of commands) {
+                if(excludedFromHelp.includes(name)) continue;
+                fields.push(commandSummaryField(command.data.toJSON()));
+            }
+            embed.addFields(fields);
+        }
+        return embed;
     }
     catch(error) {
         console.log(`Error creating help embed: ${error})`);

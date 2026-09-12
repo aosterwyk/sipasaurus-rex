@@ -6,15 +6,30 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('clips')
         .setDescription('Twitch clips settings')
-        .addBooleanOption(option => // should these be subcommands?
-            option.setName('enabled')
-                .setDescription('Enable new clip posts'))
-        .addChannelOption(option =>
-            option.setName('channel')
-                .setDescription('The Discord channel to post new clips'))
-        .addStringOption(option => 
-            option.setName('twitchchannel')
-                .setDescription('Twitch channel to monitor for new clips'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('enabled')
+                .setDescription('Enable or disable posting new Twitch clips')
+                .addBooleanOption(option =>
+                    option.setName('value')
+                        .setDescription('Enable or disable new clip posts')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('channel')
+                .setDescription('Set the Discord channel used for new clip posts')
+                .addChannelOption(option =>
+                    option.setName('discordchannel')
+                        .setDescription('The Discord channel to post new clips')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('twitchchannel')
+                .setDescription('Set the Twitch channel to monitor for new clips')
+                .addStringOption(option =>
+                    option.setName('twitchchannel')
+                        .setDescription('Twitch channel to monitor for new clips')
+                        .setRequired(true)))
         .setDefaultMemberPermissions(PermissionFlagsBits.MANAGE_GUILD)
         ,
     async execute(interaction) {
@@ -25,43 +40,30 @@ module.exports = {
             }
         }
 
-        const clipsEnabled = interaction.options.getBoolean('enabled');
-        const clipsDiscordChannel = interaction.options.getChannel('channel');
-        const clipsTwitchChannel = interaction.options.getString('twitchchannel');
         const guildId = interaction.guildId;
+        const subcommand = interaction.options.getSubcommand();
 
-        let replyMsg = ' ';
+        if(subcommand === 'enabled') {
+            const clipsEnabled = interaction.options.getBoolean('value');
+            await setGuildSetting(guildId, 'checkTwitchClips', clipsEnabled);
+            const replyMsg = clipsEnabled ? ':white_check_mark: Clip messages enabled' : ':white_check_mark: Clip messages disabled';
+            console.log(`${clipsEnabled ? 'Enabled' : 'Disabled'} clips for guild ${guildId}`);
+            await interaction.reply({ content: replyMsg, flags: MessageFlags.Ephemeral});
+        }
 
-        if(clipsEnabled !== undefined && clipsEnabled !== null) {
-            if(clipsEnabled) {
-                await setGuildSetting(guildId, 'checkTwitchClips', true);
-                // await interaction.reply({ content: `Clip messages enabled`, flags: MessageFlags.Ephemeral});
-                replyMsg += `Clip messages enabled\n`;
-                console.log(`Enabled clips for guild ${guildId}`);
-            }
-            else {
-                await setGuildSetting(guildId, 'checkTwitchClips', false);
-                // await interaction.reply({ content: `Clip messages disabled`, flags: MessageFlags.Ephemeral});
-                replyMsg += `Clip messages disabled\n`;
-                console.log(`Disbaled clips for guild ${guildId}`);
-            }
+        else if(subcommand === 'channel') {
+            const clipsDiscordChannel = interaction.options.getChannel('discordchannel');
+            await setGuildSetting(guildId, 'checkTwitchClips', true);
+            await setGuildSetting(guildId, 'discordClipsChannel', clipsDiscordChannel.id);
+            console.log(`Set clips channel for guild ${guildId} to ${clipsDiscordChannel.id}`);
+            await interaction.reply({ content: `:white_check_mark: Set clips channel to ${clipsDiscordChannel}`, flags: MessageFlags.Ephemeral});
         }
-        if(clipsDiscordChannel) {
-            // enable clips setting for guild
-            await setGuildSetting(guildId, 'checkTwitchClips', true);            
-            // set clips message channel
-            await setGuildSetting(guildId, 'discordClipsChannel', interaction.channelId);
-            // interaction.reply({ content: `Set clips channel to ${clipsDiscordChannel}`, flags: MessageFlags.Ephemeral});
-            replyMsg += `Set clips channel to ${clipsDiscordChannel}\n`;
-            console.log(`Set clips channel for guild ${guildId} to ${clipsDiscordChannel}`);
-            // clipsDiscordChannel.send("I'll start posting clips in this channel.");
-        }
-        if(clipsTwitchChannel) {
+
+        else if(subcommand === 'twitchchannel') {
+            const clipsTwitchChannel = interaction.options.getString('twitchchannel');
             await setGuildSetting(guildId, 'twitchClipsChannel', clipsTwitchChannel);
             console.log(`Set clips user for guild ${guildId} to ${clipsTwitchChannel}`);
-            // await interaction.reply({ content: `Set twitch channel to https://twitch.tv/${clipsTwitchChannel}`, flags: MessageFlags.Ephemeral});
-            replyMsg += `Set twitch channel to https://twitch.tv/${clipsTwitchChannel}\n`;
+            await interaction.reply({ content: `:white_check_mark: Set twitch channel to https://twitch.tv/${clipsTwitchChannel}`, flags: MessageFlags.Ephemeral});
         }
-        await interaction.reply({ content: replyMsg, flags: MessageFlags.Ephemeral});
     },
 };

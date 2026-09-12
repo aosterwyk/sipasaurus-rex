@@ -5,7 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-<!-- _No unreleased changes_ -->
+No unreleased changes
+
+## [0.999.2] - 2026-09-12
+### Added
+- Added `/help command:<name>` for detailed per-command usage.
+
+### Changed
+- `/twitch`, `/clips` are now organized as subcommands (e.g. `/twitch add`, `/twitch channel`) instead of one command with several optional flags. **BREAKING CHANGE** for existing usage/documentation of these commands. This also fixes a bug where setting more than one flag at once on `/twitch` or `/vstream` would throw an error.
+- `/help` is now generated from the registered commands instead of a hand-written list, so it can't drift out of sync.
+
+### Fixed
+- `deployCommands.js` no longer crashes on command files that don't export a slash command (e.g. the Elite Dangerous colony message handlers).
 
 ## [0.999.1] - 2025-08-12
 ### Added
@@ -96,6 +107,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2021-10-04
 ### Initial Release
 
+[0.999.2]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.999.2
+[0.999.1]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.999.1
+[0.999.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.999.0
 [0.8.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.8.0
 [0.7.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.7.0
 [0.6.0]: https://github.com/aosterwyk/sipasaurus-rex/tree/v0.6.0
