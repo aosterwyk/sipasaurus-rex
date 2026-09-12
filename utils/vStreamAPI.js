@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const fs = require('node:fs');
 const util = require('util');
 const vStreamCredsFilename = require('../vStreamTokens.json');
