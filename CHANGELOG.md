@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 No unreleased changes
 
-## [0.999.2] - 2026-09-12
+## [0.999.2] - 2026-09-14
 ### Added
 - Added `/help command:<name>` for detailed per-command usage.
 
